@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir_path=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd -P)
+wordlist_src="$script_dir_path/eff_large_wordlist.txt"
+
+usage() {
+    cat <<EOF
+Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [--count number] [--separator character]
+
+Generate a random passphrase using the diceware method.
+
+Available options:
+
+-h, --help      Print this help and exit
+-v, -vv         Print debug info/trace
+-c, --count     Number of words to select (default: 3)
+-s, --separator Words separator (default: blank space)
+
+Credits:
+    Default word list -- https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases
+EOF
+    exit;
+}
+
+log() {
+  echo >&2 -e "${1-}"
+}
+
+err() {
+    local msg=$1
+    local code=${2-1}
+    log "$msg"
+    exit "$code"
+}
+
+parse_params() {
+    debug=false
+    count=3
+    separator=' '
+
+    while :; do
+        case "${1-}" in
+            -h | --help) usage ;;
+            -v)
+                debug=true
+                ;;
+            -vv)
+                set -x
+                ;;
+            -c | --count)
+                count="${2-}"
+                shift
+                ;;
+            -s | --separator)
+                separator="${2-}"
+                shift
+                ;;
+            -?*) err "Unknown option: $1" ;;
+            *) break ;;
+        esac
+        shift
+    done
+
+    args=("$@")
+
+    $debug && log "Running with count = '$count'"
+    $debug && log "Running with separator = '$separator'"
+
+    return 0
+}
+parse_params "$@"
+
+
+passphrase=''
+for i in $(seq 1 $count)
+do
+    # Generating one word requires rolling the "dice" 5 times
+    word_id=$(shuf -i 1-6 -n5 --random-source=/dev/urandom | tr -d '\n')
+    found_word=$(grep "$word_id" "$wordlist_src" | tr -d '[:digit:]' | tr '[:blank:]' "$separator")
+    $debug && log "Word found by ID '$word_id' is '$found_word'"
+    passphrase+=$found_word
+done
+passphrase=$(echo $passphrase | sed "s/^$separator//g")
+
+echo $passphrase

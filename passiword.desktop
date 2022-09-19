@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Passiword passphrase generator
+Comment=Generate passphrases using the diceware method
+Path=/opt/passiword
+Exec=/opt/passiword/passiword-gui
+#Icon=Path to your desired icon
+Type=Application
+StartupWMClass=Passiword passphrase generator
+Categories=Application;Utility;
+Terminal=false
+MimeType=text/x-shellscript

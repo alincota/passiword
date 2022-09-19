@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+zenity --info \
+    --title="Your new passphrase is:" \
+    --text="$(./passiword -c 5)" \
+    --width=300 \
+    --height=100 \
+    --timeout=5
