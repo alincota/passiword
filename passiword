@@ -77,7 +77,7 @@ for i in $(seq 1 $count)
 do
     # Generating one word requires rolling the "dice" 5 times
     word_id=$(shuf -i 1-6 -n5 --random-source=/dev/urandom | tr -d '\n')
-    found_word=$(grep "$word_id" "$wordlist_src" | tr -d '[:digit:]' | tr '[:blank:]' "$separator")
+    found_word=$(grep "$word_id" "$wordlist_src" | tr -d '[:digit:]' | sed "s/[[:space:]]/${separator}/g")
     $debug && log "Word found by ID '$word_id' is '$found_word'"
     passphrase+=$found_word
 done
